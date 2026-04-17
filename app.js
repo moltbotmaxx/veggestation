@@ -74,6 +74,53 @@ const activePlant = {
   sun:"6+ horas", water:"Estable, sin charcos", help:"Si se estira mucho, necesita más luz."
 };
 
+const appDemoTabs = [
+  { id:"home", icon:"🏠", label:"Inicio" },
+  { id:"timeline", icon:"📈", label:"Proceso" },
+  { id:"journal", icon:"📓", label:"Bitácora" },
+  { id:"help", icon:"❓", label:"Ayuda" }
+];
+
+const appDemoSymptoms = {
+  yellow: {
+    chip:"🍂 Hojas amarillas",
+    title:"Posible exceso de agua",
+    detail:"La albahaca suele amarillear cuando el sustrato se mantiene demasiado húmedo varios días seguidos.",
+    action:"Deja secar la capa superior del sustrato y reduce un riego esta semana."
+  },
+  weak: {
+    chip:"📉 Tallo débil",
+    title:"Le falta más luz directa",
+    detail:"Cuando el tallo se alarga y se siente débil, normalmente está buscando luz.",
+    action:"Muévela a una ventana con más sol o gírala para equilibrar el crecimiento."
+  },
+  slow: {
+    chip:"⏳ No germina",
+    title:"Temperatura o humedad inestables",
+    detail:"En esta etapa la semilla necesita humedad pareja y una temperatura templada para abrir.",
+    action:"Mantén el sustrato húmedo, no encharcado, y revisa de nuevo en 48 horas."
+  },
+  dry: {
+    chip:"🏜️ Tierra muy seca",
+    title:"Necesita riego profundo",
+    detail:"Si la tierra se separa del borde o luce muy compacta, probablemente el agua no está penetrando bien.",
+    action:"Riega lento hasta que escurra un poco por abajo y vuelve a revisar mañana."
+  }
+};
+
+const appDemoState = {
+  activeTab:"home",
+  taskDone:false,
+  selectedSymptom:"yellow",
+  journal:[
+    { day:18, title:"La punta ya está lista", text:"Hoy toca un pinzado ligero para ayudar a que la planta se abra." },
+    { day:14, title:"Aparecieron nuevas hojas", text:"El crecimiento se ve uniforme y el color está fuerte." },
+    { day:9, title:"Primer brote estable", text:"Ya salió del sustrato y la orientación hacia la luz va bien." }
+  ],
+  photoCount:0,
+  diagnosisApplied:false
+};
+
 const scrollIntroFrames = Array.from(
   { length: 100 },
   (_, i) => `./frames/plant_${String(i).padStart(3, "0")}.webp`
@@ -83,11 +130,22 @@ const scrollIntroFrames = Array.from(
    ROUTING
 ═══════════════════════════════════════════════════════ */
 
-function currentRoute() {
-  const h = window.location.hash;
-  if (h === "#/app")     return "app";
-  if (h === "#/proyecto") return "proyecto";
-  return "home";
+function currentLocationState() {
+  const rawHash = window.location.hash || "#/";
+  const hash = rawHash.startsWith("#") ? rawHash.slice(1) : rawHash;
+
+  if (!hash || hash === "/") return { route:"home", section:"" };
+
+  if (!hash.startsWith("/")) {
+    return { route:"home", section:hash };
+  }
+
+  const parts = hash.slice(1).split("/").filter(Boolean);
+  const [first = "", second = ""] = parts;
+
+  if (first === "app") return { route:"app", section:second };
+  if (first === "proyecto") return { route:"proyecto", section:second };
+  return { route:"home", section:first };
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -102,10 +160,10 @@ function topbarUser() {
       <div class="brand-copy"><strong>Veggestation</strong><span>Semilla a cosecha, sin improvisar</span></div>
     </a>
     <nav class="topnav">
-      <a href="#como-funciona">Cómo funciona</a>
-      <a href="#kits">Kits</a>
-      <a href="#tienda">Tienda</a>
-      <a href="#faq">FAQ</a>
+      <a href="#/como-funciona">Cómo funciona</a>
+      <a href="#/kits">Kits</a>
+      <a href="#/tienda">Tienda</a>
+      <a href="#/faq">FAQ</a>
       <a class="button button-primary button-small topnav-cta" href="#/app">Ver experiencia guiada</a>
     </nav>
   </header>`;
@@ -180,7 +238,7 @@ function heroSection() {
         <h1 class="hero-display">Tu primera cosecha empieza hoy.</h1>
         <p class="hero-lead">Veggestation convierte cultivar en una experiencia clara, bella y guiada: recibes el kit, activas tu cultivo y sabes exactamente qué hacer en cada etapa.</p>
         <div class="hero-ctas">
-          <a class="button button-sun" href="#kits">Ver kits →</a>
+          <a class="button button-sun" href="#/kits">Ver kits →</a>
           <a class="button button-ghost-light" href="#/app">Ver experiencia</a>
         </div>
         <div class="hero-social-proof">
@@ -455,7 +513,7 @@ function ctaBand() {
           </div>
           <p class="form-note">Te contactamos para disponibilidad, lanzamiento de kits y novedades relevantes.</p>
           <div class="cta-band-actions">
-            <a class="button button-ghost-light" href="#kits">Ver kits</a>
+            <a class="button button-ghost-light" href="#/kits">Ver kits</a>
             <a class="button button-ghost-light" href="#/app">Ver experiencia guiada</a>
           </div>
         </div>
@@ -477,10 +535,10 @@ function siteFooter() {
           </div>
         </div>
         <div class="footer-links">
-          <a href="#como-funciona">Cómo funciona</a>
-          <a href="#kits">Kits</a>
-          <a href="#tienda">Tienda</a>
-          <a href="#faq">FAQ</a>
+          <a href="#/como-funciona">Cómo funciona</a>
+          <a href="#/kits">Kits</a>
+          <a href="#/tienda">Tienda</a>
+          <a href="#/faq">FAQ</a>
           <a href="#/app">Experiencia guiada</a>
         </div>
         <div class="footer-meta">
@@ -518,13 +576,140 @@ function userLanding() {
    BETA APP PAGE
 ═══════════════════════════════════════════════════════ */
 
+function renderAppHome(p) {
+  const todayStatus = appDemoState.taskDone ? "Completada hoy" : "Pendiente de hoy";
+  const progress = appDemoState.taskDone ? 68 : p.progress;
+  return `
+    <div class="active-plant-card">
+      <div class="card-topline">
+        <span class="chip chip-dark">${p.emoji} ${p.name}</span>
+        <span style="font-size:.8rem;color:var(--ink-60)">Día ${p.day}</span>
+      </div>
+      <h2>${p.stage}</h2>
+      <p>${p.thisWeek}</p>
+      <div class="progress-block">
+        <div class="progress-meta">
+          <span>${todayStatus}</span><strong>${progress}%</strong>
+        </div>
+        <div class="progress-bar"><span style="width:${progress}%"></span></div>
+      </div>
+    </div>
+    <div class="app-grid">
+      <article class="app-mini-card">
+        <p class="card-label">Tarea de hoy</p>
+        <h3>Qué hacer ahora</h3>
+        <p class="app-mini-text">${p.todayTask}</p>
+        <button class="button ${appDemoState.taskDone ? "button-secondary" : "button-primary"} button-small app-inline-action"
+                type="button" data-app-action="complete-task">
+          ${appDemoState.taskDone ? "✓ Marcada como hecha" : "Marcar como hecha"}
+        </button>
+      </article>
+      <article class="app-mini-card">
+        <p class="card-label">Condiciones</p>
+        <h3>Sol y riego</h3>
+        <ul>
+          <li>☀️ ${p.sun}</li>
+          <li>💧 ${p.water}</li>
+          <li>💡 ${p.help}</li>
+        </ul>
+      </article>
+    </div>
+    <div class="active-plant-card">
+      <p class="card-label">Resumen rápido</p>
+      <div class="app-status-stack">
+        <div class="app-status-row"><span>Próximo hito</span><strong>Pinzado ligero</strong></div>
+        <div class="app-status-row"><span>Riego sugerido</span><strong>Mañana por la mañana</strong></div>
+        <div class="app-status-row"><span>Última foto</span><strong>${appDemoState.photoCount > 0 ? "Hoy" : "Hace 3 días"}</strong></div>
+      </div>
+    </div>`;
+}
+
+function renderAppTimeline() {
+  const stages = [
+    { day:"Día 1", title:"Siembra", text:"Semilla activada y primer riego." },
+    { day:"Día 6", title:"Brote", text:"Primer tallo visible y orientación a la luz." },
+    { day:"Día 12", title:"Hojas nuevas", text:"La estructura se empieza a abrir." },
+    { day:"Hoy", title:"Pinzado ligero", text:"Momento ideal para fomentar más volumen." },
+    { day:"Día 28", title:"Primera cosecha", text:"Listo para cortar sin frenar el crecimiento." }
+  ];
+  return `
+    <div class="active-plant-card">
+      <p class="card-label">Proceso del cultivo</p>
+      <div class="mini-timeline">
+        ${stages.map((stage, index) => `
+        <div class="timeline-dot ${index < 3 ? "done" : index === 3 ? "active" : ""}">
+          <div class="dot"></div><small>${stage.title}</small>
+        </div>`).join("")}
+      </div>
+    </div>
+    <div class="app-stack-list">
+      ${stages.map((stage, index) => `
+        <article class="app-detail-card ${index === 3 ? "app-detail-card-active" : ""}">
+          <div class="app-detail-topline">
+            <span>${stage.day}</span>
+            <strong>${stage.title}</strong>
+          </div>
+          <p>${stage.text}</p>
+        </article>`).join("")}
+    </div>`;
+}
+
+function renderAppJournal() {
+  return `
+    <div class="active-plant-card">
+      <div class="card-topline">
+        <div>
+          <p class="card-label">Bitácora</p>
+          <h2 style="margin:0">Tu historial del cultivo</h2>
+        </div>
+        <span class="chip">${appDemoState.journal.length} entradas</span>
+      </div>
+      <p style="font-size:.84rem;color:var(--ink-60)">Cada foto y observación te ayuda a entender cómo cambia tu planta con el tiempo.</p>
+    </div>
+    <div class="app-stack-list">
+      ${appDemoState.journal.map(entry => `
+        <article class="app-detail-card">
+          <div class="app-detail-topline">
+            <span>Día ${entry.day}</span>
+            <strong>${entry.title}</strong>
+          </div>
+          <p>${entry.text}</p>
+        </article>`).join("")}
+    </div>`;
+}
+
+function renderAppHelp() {
+  const current = appDemoSymptoms[appDemoState.selectedSymptom];
+  return `
+    <div class="active-plant-card">
+      <p class="card-label">Ayuda rápida</p>
+      <h2 style="margin-bottom:.4rem">${current.title}</h2>
+      <p>${current.detail}</p>
+      <div class="app-help-callout">
+        <span>Recomendación</span>
+        <strong>${current.action}</strong>
+      </div>
+      <button class="button ${appDemoState.diagnosisApplied ? "button-secondary" : "button-primary"} button-small app-inline-action"
+              type="button" data-app-action="apply-diagnosis">
+        ${appDemoState.diagnosisApplied ? "✓ Aplicado al plan" : "Aplicar al plan de hoy"}
+      </button>
+    </div>
+    <div class="symptoms">
+      ${Object.entries(appDemoSymptoms).map(([key, symptom]) => `
+        <button class="symptom ${appDemoState.selectedSymptom === key ? "symptom-active" : ""}"
+                type="button" data-symptom="${key}">${symptom.chip}</button>`).join("")}
+    </div>`;
+}
+
+function renderAppPhoneContent(p) {
+  if (appDemoState.activeTab === "timeline") return renderAppTimeline(p);
+  if (appDemoState.activeTab === "journal") return renderAppJournal();
+  if (appDemoState.activeTab === "help") return renderAppHelp();
+  return renderAppHome(p);
+}
+
 function betaPage() {
   const p = activePlant;
-  const dots = [
-    { label:"Semilla", state:"done" }, { label:"Brote", state:"done" },
-    { label:"Hojas",   state:"active" }, { label:"Pinzado", state:"" },
-    { label:"Cosecha", state:"" }
-  ];
   return `
   <main class="app-page">
     <div class="phone-outer">
@@ -539,64 +724,16 @@ function betaPage() {
             <div class="welcome">
               <div>
                 <p class="eyebrow">Hola, Esteban 👋</p>
-                <h1>Tu cultivo va en buen camino.</h1>
+                <h1>${appDemoState.activeTab === "journal" ? "Tu bitácora está creciendo." : appDemoState.activeTab === "help" ? "Vamos a revisar esa señal." : "Tu cultivo va en buen camino."}</h1>
               </div>
-              <button class="button button-primary button-small" type="button">📷 Foto</button>
+              <button class="button button-primary button-small" type="button" data-app-action="capture-photo">📷 Foto</button>
             </div>
-            <div class="active-plant-card">
-              <div class="card-topline">
-                <span class="chip chip-dark">${p.emoji} ${p.name}</span>
-                <span style="font-size:.8rem;color:var(--ink-60)">Día ${p.day}</span>
-              </div>
-              <h2>${p.stage}</h2>
-              <p>${p.thisWeek}</p>
-              <div class="progress-block">
-                <div class="progress-meta">
-                  <span>Progreso estimado</span><strong>${p.progress}%</strong>
-                </div>
-                <div class="progress-bar"><span style="width:${p.progress}%"></span></div>
-              </div>
-            </div>
-            <div class="app-grid">
-              <article class="app-mini-card">
-                <p class="card-label">Tarea de hoy</p>
-                <h3>Qué hacer ahora</h3>
-                <p style="font-size:.83rem;color:var(--ink-60)">${p.todayTask}</p>
-              </article>
-              <article class="app-mini-card">
-                <p class="card-label">Condiciones</p>
-                <h3>Sol y riego</h3>
-                <ul>
-                  <li>☀️ ${p.sun}</li>
-                  <li>💧 ${p.water}</li>
-                  <li>💡 ${p.help}</li>
-                </ul>
-              </article>
-            </div>
-            <div class="active-plant-card">
-              <p class="card-label">Timeline · semilla hasta cosecha</p>
-              <div class="mini-timeline">
-                ${dots.map(d => `
-                <div class="timeline-dot ${d.state}">
-                  <div class="dot"></div><small>${d.label}</small>
-                </div>`).join("")}
-              </div>
-            </div>
-            <div class="active-plant-card">
-              <p class="card-label">Mi planta no se ve bien</p>
-              <p style="font-size:.85rem;color:var(--ink-60);margin:.25rem 0 .1rem">Ayuda rápida</p>
-              <div class="symptoms">
-                <button class="symptom" type="button">🍂 Hojas amarillas</button>
-                <button class="symptom" type="button">📉 Tallo débil</button>
-                <button class="symptom" type="button">⏳ No germina</button>
-                <button class="symptom" type="button">🏜️ Tierra muy seca</button>
-              </div>
-            </div>
+            ${renderAppPhoneContent(p)}
             <nav class="bottom-nav">
-              <span class="bottom-tab active">🏠 Home</span>
-              <span class="bottom-tab">📈 Timeline</span>
-              <span class="bottom-tab">📓 Bitácora</span>
-              <span class="bottom-tab">❓ Ayuda</span>
+              ${appDemoTabs.map(tab => `
+                <button class="bottom-tab ${appDemoState.activeTab === tab.id ? "active" : ""}"
+                        type="button" data-app-tab="${tab.id}">${tab.icon} ${tab.label}</button>
+              `).join("")}
             </nav>
           </div>
         </div>
@@ -678,7 +815,7 @@ function projectPage() {
         <p class="hero-text">Veggestation combina un kit físico y una app mobile-first para acompañar a la persona en cada etapa. La idea no es vender solo una maceta: es vender tranquilidad, progreso visible y una primera cosecha real.</p>
         <div class="hero-actions">
           <a class="button button-primary" href="#/app">Abrir beta app</a>
-          <a class="button button-secondary" href="#modelo-int">Ver modelo</a>
+          <a class="button button-secondary" href="#/proyecto/modelo-int">Ver modelo</a>
         </div>
         <div class="hero-metrics">
           ${metric("Cultivos v1","4 fáciles","🌱")}
@@ -783,6 +920,53 @@ function initCTAs() {
     } else {
       showToast("Ingresa un email válido 📧");
     }
+  });
+}
+
+function initAppDemo() {
+  document.querySelectorAll("[data-app-tab]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      appDemoState.activeTab = btn.dataset.appTab;
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-symptom]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      appDemoState.selectedSymptom = btn.dataset.symptom;
+      appDemoState.activeTab = "help";
+      appDemoState.diagnosisApplied = false;
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-app-action]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const action = btn.dataset.appAction;
+      if (action === "capture-photo") {
+        appDemoState.photoCount += 1;
+        appDemoState.activeTab = "journal";
+        appDemoState.journal.unshift({
+          day: activePlant.day,
+          title:`Foto guardada ${appDemoState.photoCount}`,
+          text:"Tomaste una foto para comparar el crecimiento y seguir el cambio de forma visual."
+        });
+        showToast("Foto guardada en la bitácora 📷");
+        render();
+      }
+
+      if (action === "complete-task") {
+        appDemoState.taskDone = !appDemoState.taskDone;
+        showToast(appDemoState.taskDone ? "Tarea marcada como hecha ✅" : "Tarea devuelta a pendiente");
+        render();
+      }
+
+      if (action === "apply-diagnosis") {
+        appDemoState.diagnosisApplied = true;
+        showToast("Recomendación añadida al plan de hoy 🌿");
+        render();
+      }
+    });
   });
 }
 
@@ -1004,7 +1188,7 @@ function showToast(msg) {
 ═══════════════════════════════════════════════════════ */
 
 function render() {
-  const route = currentRoute();
+  const { route, section } = currentLocationState();
   if (_scrollLandingCleanup) {
     _scrollLandingCleanup();
     _scrollLandingCleanup = null;
@@ -1017,9 +1201,22 @@ function render() {
   document.getElementById("root").innerHTML = `<div class="shell shell-${route}">${topbar}${content}</div>`;
 
   if (route === "home") { initScrollLanding(); initFAQ(); initCTAs(); }
+  if (route === "app") { initAppDemo(); }
+
+  if (section) {
+    requestAnimationFrame(() => {
+      const target = document.getElementById(section);
+      if (!target) return;
+      target.scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+  }
 }
 
-window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
+window.addEventListener("hashchange", () => {
+  const { section } = currentLocationState();
+  render();
+  if (!section) window.scrollTo(0, 0);
+});
 window.addEventListener("DOMContentLoaded", () => {
   if (!window.location.hash) window.location.hash = "#/";
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(() => {});
