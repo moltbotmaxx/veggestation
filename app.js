@@ -74,6 +74,11 @@ const activePlant = {
   sun:"6+ horas", water:"Estable, sin charcos", help:"Si se estira mucho, necesita más luz."
 };
 
+const scrollIntroFrames = Array.from(
+  { length: 100 },
+  (_, i) => `./frames/plant_${String(i).padStart(3, "0")}.webp`
+);
+
 /* ═══════════════════════════════════════════════════════
    ROUTING
 ═══════════════════════════════════════════════════════ */
@@ -141,6 +146,30 @@ function topbarProject() {
 /* ═══════════════════════════════════════════════════════
    USER LANDING — sections
 ═══════════════════════════════════════════════════════ */
+
+function scrollIntroSection() {
+  return `
+  <section class="scroll-intro" id="scrollLanding">
+    <div class="scroll-intro-sticky">
+      <div class="scroll-intro-media" aria-hidden="true">
+        <canvas
+          id="scrollLandingCanvas"
+          class="scroll-intro-canvas"
+          aria-label="Planta germinando"
+        ></canvas>
+        <div class="scroll-intro-loading" id="scrollLandingLoading">Preparando secuencia…</div>
+      </div>
+      <div class="scroll-intro-stage">
+        <p class="scroll-intro-kicker">Semilla a cosecha</p>
+        <h1 class="scroll-intro-title">Veggestation</h1>
+        <div class="scroll-intro-cue" aria-hidden="true">
+          <span class="scroll-intro-cue-line"></span>
+          <span class="scroll-intro-cue-arrow">↓</span>
+        </div>
+      </div>
+    </div>
+  </section>`;
+}
 
 function heroSection() {
   return `
@@ -462,18 +491,27 @@ function siteFooter() {
   </footer>`;
 }
 
+function clientSite() {
+  return `
+  <div class="client-page-shell" id="clientPageShell">
+    ${topbarUser()}
+    ${heroSection()}
+    ${nameSection()}
+    ${howItWorksSection()}
+    ${plantsSection()}
+    ${kitsSection()}
+    ${appPreviewSection()}
+    ${storeSection()}
+    ${faqSection()}
+    ${ctaBand()}
+    ${siteFooter()}
+  </div>`;
+}
+
 function userLanding() {
   return `
-  ${heroSection()}
-  ${nameSection()}
-  ${howItWorksSection()}
-  ${plantsSection()}
-  ${kitsSection()}
-  ${appPreviewSection()}
-  ${storeSection()}
-  ${faqSection()}
-  ${ctaBand()}
-  ${siteFooter()}`;
+  ${scrollIntroSection()}
+  ${clientSite()}`;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -748,6 +786,181 @@ function initCTAs() {
   });
 }
 
+let _scrollLandingCleanup;
+function initScrollLanding() {
+  const section = document.getElementById("scrollLanding");
+  const canvas = document.getElementById("scrollLandingCanvas");
+  const loading = document.getElementById("scrollLandingLoading");
+  if (!section || !canvas) return;
+
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let ticking = false;
+  let rafId = 0;
+  let targetProgress = 0;
+  let currentProgress = 0;
+  let currentFrameIndex = -1;
+  let loadedFrames = new Array(scrollIntroFrames.length).fill(null);
+  let disposed = false;
+  const context = canvas.getContext("2d", { alpha: false });
+  const introFrameCount = scrollIntroFrames.length;
+  const dissolveStartFrame = 84;
+  const dissolveEndFrame = 100;
+  const dissolveStartIndex = Math.max(0, dissolveStartFrame - 1);
+  const dissolveEndIndex = Math.max(dissolveStartIndex, dissolveEndFrame - 1);
+  const dissolveStartProgress = dissolveStartIndex / Math.max(introFrameCount - 1, 1);
+  const dissolveEndProgress = Math.min(1, dissolveEndIndex / Math.max(introFrameCount - 1, 1));
+
+  const drawFrame = (frameSource) => {
+    if (!context || !frameSource) return;
+    const { width, height } = canvas.getBoundingClientRect();
+    const renderWidth = Math.max(Math.round(width * window.devicePixelRatio), 1);
+    const renderHeight = Math.max(Math.round(height * window.devicePixelRatio), 1);
+
+    if (canvas.width !== renderWidth || canvas.height !== renderHeight) {
+      canvas.width = renderWidth;
+      canvas.height = renderHeight;
+    }
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#f7f1e3";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    const srcWidth = frameSource.width || frameSource.videoWidth || 1;
+    const srcHeight = frameSource.height || frameSource.videoHeight || 1;
+    const scale = Math.min(canvas.width / srcWidth, canvas.height / srcHeight);
+    const drawWidth = srcWidth * scale;
+    const drawHeight = srcHeight * scale;
+    const dx = (canvas.width - drawWidth) / 2;
+    const dy = (canvas.height - drawHeight) / 2;
+
+    context.drawImage(frameSource, dx, dy, drawWidth, drawHeight);
+  };
+
+  const renderCurrentFrame = () => {
+    const availableFrames = loadedFrames.filter(Boolean);
+    if (!availableFrames.length) return;
+    const scrubProgress = Math.min(currentProgress / 0.82, 1);
+    const nextFrameIndex = Math.min(
+      loadedFrames.length - 1,
+      Math.round(scrubProgress * (loadedFrames.length - 1))
+    );
+
+    let resolvedIndex = nextFrameIndex;
+    while (resolvedIndex >= 0 && !loadedFrames[resolvedIndex]) {
+      resolvedIndex -= 1;
+    }
+    if (resolvedIndex < 0) {
+      resolvedIndex = loadedFrames.findIndex(Boolean);
+    }
+    if (resolvedIndex < 0) return;
+
+    if (resolvedIndex !== currentFrameIndex) {
+      currentFrameIndex = resolvedIndex;
+      drawFrame(loadedFrames[currentFrameIndex]);
+    }
+  };
+
+  const setVars = (progress) => {
+    const title = Math.min(progress / 0.18, 1);
+    const reveal = progress <= dissolveStartProgress
+      ? 0
+      : Math.min((progress - dissolveStartProgress) / Math.max(dissolveEndProgress - dissolveStartProgress, 0.001), 1);
+    const dissolve = progress <= dissolveStartProgress
+      ? 0
+      : Math.min((progress - dissolveStartProgress) / Math.max(dissolveEndProgress - dissolveStartProgress, 0.001), 1);
+
+    document.documentElement.style.setProperty("--intro-progress", progress.toFixed(4));
+    document.documentElement.style.setProperty("--intro-title-progress", title.toFixed(4));
+    document.documentElement.style.setProperty("--intro-reveal", reveal.toFixed(4));
+    document.documentElement.style.setProperty("--intro-dissolve", dissolve.toFixed(4));
+  };
+
+  const animate = () => {
+    rafId = 0;
+    currentProgress += (targetProgress - currentProgress) * (prefersReducedMotion ? 1 : 0.1);
+    if (Math.abs(targetProgress - currentProgress) < 0.001) {
+      currentProgress = targetProgress;
+    }
+
+    setVars(currentProgress);
+    renderCurrentFrame();
+
+    if (Math.abs(targetProgress - currentProgress) >= 0.001) {
+      rafId = requestAnimationFrame(animate);
+    }
+  };
+
+  const update = () => {
+    ticking = false;
+
+    const total = Math.max(section.offsetHeight - window.innerHeight, 1);
+    const top = Math.max(0, -section.getBoundingClientRect().top);
+    targetProgress = Math.min(1, top / total);
+
+    if (!rafId) {
+      rafId = requestAnimationFrame(animate);
+    }
+  };
+
+  const requestUpdate = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  };
+
+  const onResize = () => {
+    currentFrameIndex = -1;
+    renderCurrentFrame();
+    requestUpdate();
+  };
+
+  window.addEventListener("scroll", requestUpdate, { passive: true });
+  window.addEventListener("resize", onResize);
+  loading?.classList.add("is-visible");
+
+  let loadedCount = 0;
+  let failedCount = 0;
+
+  scrollIntroFrames.forEach((src, index) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.onload = () => {
+      if (disposed) return;
+      loadedFrames[index] = image;
+      loadedCount += 1;
+
+      if (loadedCount === 1) {
+        loading?.classList.remove("is-visible");
+        currentFrameIndex = -1;
+        renderCurrentFrame();
+      } else {
+        requestUpdate();
+      }
+    };
+    image.onerror = () => {
+      if (disposed) return;
+      failedCount += 1;
+      if (loadedCount === 0 && failedCount === scrollIntroFrames.length && loading) {
+        loading.textContent = "No pudimos cargar la secuencia.";
+        loading.classList.add("is-visible");
+      }
+    };
+    image.src = src;
+  });
+
+  _scrollLandingCleanup = () => {
+    disposed = true;
+    window.removeEventListener("scroll", requestUpdate);
+    window.removeEventListener("resize", onResize);
+    if (rafId) cancelAnimationFrame(rafId);
+    loadedFrames = [];
+    document.documentElement.style.removeProperty("--intro-progress");
+    document.documentElement.style.removeProperty("--intro-title-progress");
+    document.documentElement.style.removeProperty("--intro-reveal");
+    document.documentElement.style.removeProperty("--intro-dissolve");
+  };
+}
+
 let _toastTimer;
 function showToast(msg) {
   let t = document.getElementById("vg-toast");
@@ -764,14 +977,18 @@ function showToast(msg) {
 
 function render() {
   const route = currentRoute();
+  if (_scrollLandingCleanup) {
+    _scrollLandingCleanup();
+    _scrollLandingCleanup = null;
+  }
   let topbar, content;
   if      (route === "app")      { topbar = topbarApp();     content = betaPage(); }
   else if (route === "proyecto") { topbar = topbarProject(); content = projectPage(); }
-  else                           { topbar = topbarUser();    content = userLanding(); }
+  else                           { topbar = "";             content = userLanding(); }
 
-  document.getElementById("root").innerHTML = `<div class="shell">${topbar}${content}</div>`;
+  document.getElementById("root").innerHTML = `<div class="shell shell-${route}">${topbar}${content}</div>`;
 
-  if (route === "home") { initFAQ(); initCTAs(); }
+  if (route === "home") { initScrollLanding(); initFAQ(); initCTAs(); }
 }
 
 window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
