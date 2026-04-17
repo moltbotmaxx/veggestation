@@ -98,8 +98,8 @@ function topbarUser() {
   return `
   <header class="topbar topbar-user">
     <a class="brand" href="#/">
-      <span class="brand-mark">V</span>
-      <div><strong>Veggestation</strong><span>Semilla a cosecha, sin improvisar</span></div>
+      <span class="brand-mark" aria-hidden="true">V</span>
+      <div class="brand-copy"><strong>Veggestation</strong><span>Semilla a cosecha, sin improvisar</span></div>
     </a>
     <nav class="topnav">
       <a href="#como-funciona">Cómo funciona</a>
@@ -115,8 +115,8 @@ function topbarApp() {
   return `
   <header class="topbar">
     <a class="brand" href="#/">
-      <span class="brand-mark">V</span>
-      <div><strong>Veggestation</strong><span>Semilla a cosecha, sin improvisar</span></div>
+      <span class="brand-mark" aria-hidden="true">V</span>
+      <div class="brand-copy"><strong>Veggestation</strong><span>Semilla a cosecha, sin improvisar</span></div>
     </a>
     <nav class="topnav">
       <a href="#/">← Inicio</a>
@@ -130,8 +130,8 @@ function topbarProject() {
   <header class="topbar topbar-project">
     <div class="brand-and-badge">
       <a class="brand" href="#/">
-        <span class="brand-mark brand-mark-sm">V</span>
-        <div><strong>Veggestation</strong><span>Semilla a cosecha, sin improvisar</span></div>
+        <span class="brand-mark brand-mark-sm" aria-hidden="true">V</span>
+        <div class="brand-copy"><strong>Veggestation</strong><span>Semilla a cosecha, sin improvisar</span></div>
       </a>
       <span class="internal-chip">Vista interna</span>
     </div>
@@ -791,16 +791,20 @@ function initScrollLanding() {
   const section = document.getElementById("scrollLanding");
   const canvas = document.getElementById("scrollLandingCanvas");
   const loading = document.getElementById("scrollLandingLoading");
-  if (!section || !canvas) return;
+  const clientPageShell = document.getElementById("clientPageShell");
+  if (!section || !canvas || !clientPageShell) return;
 
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let ticking = false;
   let rafId = 0;
   let targetProgress = 0;
   let currentProgress = 0;
+  let lastScrollY = window.scrollY;
   let currentFrameIndex = -1;
   let loadedFrames = new Array(scrollIntroFrames.length).fill(null);
   let disposed = false;
+  let hasSnappedToSite = false;
+  let snapTimeoutId = 0;
   const context = canvas.getContext("2d", { alpha: false });
   const introFrameCount = scrollIntroFrames.length;
   const dissolveStartFrame = 84;
@@ -827,7 +831,7 @@ function initScrollLanding() {
 
     const srcWidth = frameSource.width || frameSource.videoWidth || 1;
     const srcHeight = frameSource.height || frameSource.videoHeight || 1;
-    const scale = Math.min(canvas.width / srcWidth, canvas.height / srcHeight);
+    const scale = Math.max(canvas.width / srcWidth, canvas.height / srcHeight);
     const drawWidth = srcWidth * scale;
     const drawHeight = srcHeight * scale;
     const dx = (canvas.width - drawWidth) / 2;
@@ -896,6 +900,29 @@ function initScrollLanding() {
     const total = Math.max(section.offsetHeight - window.innerHeight, 1);
     const top = Math.max(0, -section.getBoundingClientRect().top);
     targetProgress = Math.min(1, top / total);
+    const scrollingDown = window.scrollY > lastScrollY;
+    lastScrollY = window.scrollY;
+
+    if (!hasSnappedToSite && scrollingDown && targetProgress >= dissolveEndProgress) {
+      hasSnappedToSite = true;
+      const topbar = clientPageShell.querySelector(".topbar");
+      const topbarHeight = topbar ? topbar.getBoundingClientRect().height : 0;
+      const siteTop = Math.max(
+        0,
+        window.scrollY + clientPageShell.getBoundingClientRect().top - topbarHeight
+      );
+      window.scrollTo({
+        top: siteTop,
+        behavior: prefersReducedMotion ? "auto" : "smooth"
+      });
+
+      clearTimeout(snapTimeoutId);
+      snapTimeoutId = window.setTimeout(() => {
+        snapTimeoutId = 0;
+      }, prefersReducedMotion ? 0 : 700);
+    } else if (hasSnappedToSite && !scrollingDown && targetProgress < dissolveStartProgress * 0.9) {
+      hasSnappedToSite = false;
+    }
 
     if (!rafId) {
       rafId = requestAnimationFrame(animate);
@@ -953,6 +980,7 @@ function initScrollLanding() {
     window.removeEventListener("scroll", requestUpdate);
     window.removeEventListener("resize", onResize);
     if (rafId) cancelAnimationFrame(rafId);
+    if (snapTimeoutId) clearTimeout(snapTimeoutId);
     loadedFrames = [];
     document.documentElement.style.removeProperty("--intro-progress");
     document.documentElement.style.removeProperty("--intro-title-progress");

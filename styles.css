@@ -61,20 +61,62 @@ ul, ol { padding: 0; list-style: none; }
   border-bottom: 1px solid var(--ink-10);
 }
 
-.brand { display: flex; align-items: center; gap: .8rem; }
-.brand > div { min-width: 0; }
-.brand strong { font-family: "DM Serif Display", serif; font-size: 1.15rem; }
-.brand span { display: block; font-size: .75rem; color: var(--ink-60); }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  min-width: 0;
+}
+.brand-copy {
+  min-width: 0;
+  display: grid;
+  gap: .08rem;
+}
+.brand-copy strong {
+  display: block;
+  font-family: "DM Serif Display", serif;
+  font-size: 1.35rem;
+  line-height: .95;
+  letter-spacing: -.025em;
+  color: var(--ink);
+}
+.brand-copy span {
+  display: block;
+  font-size: .84rem;
+  line-height: 1.15;
+  color: var(--ink-60);
+}
 
 .brand-mark {
-  display: grid; place-items: center;
-  width: 2.5rem; height: 2.5rem;
-  border-radius: .85rem;
-  background: linear-gradient(145deg, #3a7d52 0%, var(--ink) 100%);
-  color: var(--cream);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  flex: 0 0 auto;
+  border-radius: .95rem;
+  background:
+    radial-gradient(circle at 30% 28%, rgba(255,255,255,.2), transparent 35%),
+    linear-gradient(160deg, #356f4b 0%, #173325 100%);
+  color: rgba(255,251,240,.96);
   font-family: "DM Serif Display", serif;
-  font-size: 1.1rem;
-  box-shadow: 0 4px 12px rgba(18,39,26,.28);
+  font-size: .98rem;
+  line-height: 1;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 8px 18px rgba(18,39,26,.18);
+}
+.brand-mark::after {
+  content: "";
+  position: absolute;
+  width: .54rem;
+  height: .54rem;
+  top: .34rem;
+  right: .32rem;
+  border-radius: .55rem .08rem .55rem .08rem;
+  background: rgba(212,237,218,.92);
+  transform: rotate(22deg);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.08);
 }
 
 .topnav {
@@ -178,7 +220,7 @@ ul, ol { padding: 0; list-style: none; }
 
 .scroll-intro {
   position: relative;
-  height: 260vh;
+  height: 205vh;
 }
 
 .scroll-intro-sticky {
@@ -214,9 +256,9 @@ ul, ol { padding: 0; list-style: none; }
 
 .scroll-intro-title {
   font-family: "DM Serif Display", Georgia, serif;
-  font-size: clamp(3.5rem, 11vw, 8.5rem);
-  line-height: .88;
-  letter-spacing: -.05em;
+  font-size: clamp(3.35rem, 10vw, 7.2rem);
+  line-height: .94;
+  letter-spacing: -.035em;
   color: #fffdf8;
   text-shadow:
     0 10px 30px rgba(18,39,26,.22),
@@ -225,6 +267,7 @@ ul, ol { padding: 0; list-style: none; }
   transform: translateY(calc(var(--intro-title-progress) * -3rem)) scale(calc(1 - (var(--intro-title-progress) * .08)));
   transition: opacity .12s linear, transform .12s linear;
   text-wrap: balance;
+  max-width: 12ch;
 }
 
 .scroll-intro-media {
@@ -233,6 +276,7 @@ ul, ol { padding: 0; list-style: none; }
   z-index: 0;
   opacity: calc(1 - (var(--intro-dissolve) * .9));
   transition: opacity .22s linear;
+  background: #0f1712;
 }
 
 .scroll-intro-media::after {
@@ -250,7 +294,7 @@ ul, ol { padding: 0; list-style: none; }
   display: block;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, #fffdf7, #f5efdf);
+  background: #0f1712;
 }
 
 .scroll-intro-loading {
@@ -720,7 +764,7 @@ ul, ol { padding: 0; list-style: none; }
   .plant-grid { grid-template-columns: repeat(2, 1fr); }
   .mini-timeline { grid-template-columns: repeat(5, 1fr); }
   .commerce-bg { padding: 1.5rem; }
-  .scroll-intro { height: 220vh; }
+  .scroll-intro { height: 185vh; }
   .scroll-intro-stage { width: calc(100% - 1.5rem); gap: 1rem; }
   .scroll-intro-title { font-size: clamp(3rem, 17vw, 5rem); }
   .client-page-shell {
@@ -1230,7 +1274,12 @@ ul, ol { padding: 0; list-style: none; }
 .footer-brand { display: flex; align-items: center; gap: .75rem; }
 .footer-brand strong { display: block; color: var(--cream); font-family: "DM Serif Display", serif; }
 .footer-brand p { font-size: .8rem; margin: .1rem 0 0; }
-.brand-mark-sm { font-size: .85rem !important; width: 2rem !important; height: 2rem !important; border-radius: .6rem !important; }
+.brand-mark-sm {
+  font-size: .8rem !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  border-radius: .78rem !important;
+}
 .footer-links { display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: .88rem; }
 .footer-links a { color: rgba(255,251,238,.5); transition: color .15s; }
 .footer-links a:hover { color: var(--cream); }
@@ -1328,6 +1377,9 @@ ul, ol { padding: 0; list-style: none; }
 @media (max-width: 480px) {
   .plants-user-grid, .store-grid { grid-template-columns: 1fr; }
   .mini-bezel { width: 100%; max-width: 300px; }
-  .scroll-intro { height: 190vh; }
-  .scroll-intro-title { font-size: 3.1rem; }
+  .scroll-intro { height: 165vh; }
+  .scroll-intro-title {
+    font-size: 3rem;
+    line-height: .96;
+  }
 }
