@@ -1,0 +1,290 @@
+[
+  {
+    "plantId": "radish",
+    "name": "Rabano",
+    "category": "vegetable",
+    "difficulty": "easy",
+    "kitFit": "excellent",
+    "whyItWorks": [
+      "Es rapido y da una victoria temprana.",
+      "Se siembra directo y no exige trasplante.",
+      "Es facil de explicar en una experiencia guiada."
+    ],
+    "germinationDays": [4, 10],
+    "harvestDays": [25, 40],
+    "sun": {
+      "label": "Sol parcial a pleno",
+      "hours": "4-6+ horas"
+    },
+    "watering": {
+      "label": "Humedad constante sin encharcar",
+      "cadenceHint": "Revisar humedad casi a diario en clima caliente"
+    },
+    "specialTasks": [
+      "Aclarar si nacen demasiadas plantulas juntas.",
+      "No dejar que el sustrato se seque por completo."
+    ],
+    "commonProblems": [
+      {
+        "symptom": "No germina",
+        "likelyCause": "Poca humedad o semilla profunda",
+        "whatToDo": "Mantener el sustrato ligeramente humedo y esperar unos dias mas dentro del rango normal."
+      },
+      {
+        "symptom": "Sale mucha hoja pero poco bulbo",
+        "likelyCause": "Poco sol o exceso de competencia",
+        "whatToDo": "Mover a una zona con mejor luz y aclarar plantulas si estan muy juntas."
+      }
+    ],
+    "stages": [
+      {
+        "id": "seed",
+        "label": "Semilla sembrada",
+        "startDay": 0,
+        "endDay": 4,
+        "todayFocus": "Revisar humedad del sustrato",
+        "expectation": "Todavia no deberias ver cambios visibles."
+      },
+      {
+        "id": "germination",
+        "label": "Germinacion",
+        "startDay": 4,
+        "endDay": 10,
+        "todayFocus": "Buscar brotes pequenos",
+        "expectation": "Deberian empezar a salir los primeros brotes."
+      },
+      {
+        "id": "growth",
+        "label": "Crecimiento",
+        "startDay": 10,
+        "endDay": 24,
+        "todayFocus": "Revisar si necesitan aclarado",
+        "expectation": "Las hojas aumentan y la base de la planta empieza a engrosar."
+      },
+      {
+        "id": "harvest",
+        "label": "Listo para cosecha",
+        "startDay": 25,
+        "endDay": 40,
+        "todayFocus": "Revisar tamano del rabano",
+        "expectation": "El bulbo ya deberia verse o sentirse listo para cosechar."
+      }
+    ]
+  },
+  {
+    "plantId": "leaf-lettuce",
+    "name": "Lechuga de hoja",
+    "category": "vegetable",
+    "difficulty": "easy",
+    "kitFit": "excellent",
+    "whyItWorks": [
+      "Es amable con principiantes.",
+      "Tolera mejor que otros cultivos una luz menos intensa.",
+      "La cosecha por hojas da sensacion de progreso continuo."
+    ],
+    "germinationDays": [5, 10],
+    "harvestDays": [30, 50],
+    "sun": {
+      "label": "Luz brillante con sol suave",
+      "hours": "4-6 horas"
+    },
+    "watering": {
+      "label": "Suelo uniformemente humedo",
+      "cadenceHint": "Revisar a diario; evitar sustrato reseco por periodos largos"
+    },
+    "specialTasks": [
+      "Cosechar hojas externas primero.",
+      "Proteger del calor fuerte para evitar amargor o espigado temprano."
+    ],
+    "commonProblems": [
+      {
+        "symptom": "Hojas caidas",
+        "likelyCause": "Falta de agua o calor fuerte",
+        "whatToDo": "Revisar humedad y mover a una zona con luz intensa pero menos agresiva."
+      },
+      {
+        "symptom": "Sube un tallo central muy rapido",
+        "likelyCause": "Espigado por calor",
+        "whatToDo": "Cosechar lo aprovechable y considerar un lugar mas fresco para el siguiente intento."
+      }
+    ],
+    "stages": [
+      {
+        "id": "seed",
+        "label": "Semilla sembrada",
+        "startDay": 0,
+        "endDay": 5,
+        "todayFocus": "Mantener humedad uniforme",
+        "expectation": "Aun no deberias ver hojas."
+      },
+      {
+        "id": "germination",
+        "label": "Primeros brotes",
+        "startDay": 5,
+        "endDay": 10,
+        "todayFocus": "Confirmar brotes y buena luz",
+        "expectation": "Empiezan a aparecer plántulas finas y pequenas."
+      },
+      {
+        "id": "growth",
+        "label": "Formacion de hojas",
+        "startDay": 10,
+        "endDay": 29,
+        "todayFocus": "Revisar espacio y humedad",
+        "expectation": "Cada semana deberias ver mas hojas y mayor volumen."
+      },
+      {
+        "id": "harvest",
+        "label": "Cosecha",
+        "startDay": 30,
+        "endDay": 50,
+        "todayFocus": "Cortar hojas externas",
+        "expectation": "Ya puedes cosechar poco a poco sin sacar toda la planta."
+      }
+    ]
+  },
+  {
+    "plantId": "basil",
+    "name": "Albahaca",
+    "category": "herb",
+    "difficulty": "easy",
+    "kitFit": "excellent",
+    "whyItWorks": [
+      "Crece con rapidez y se siente abundante.",
+      "Tiene aroma y valor inmediato en cocina.",
+      "Permite tareas claras como pinzado y cosecha ligera."
+    ],
+    "germinationDays": [5, 10],
+    "harvestDays": [35, 60],
+    "sun": {
+      "label": "Luz fuerte o pleno sol",
+      "hours": "6+ horas"
+    },
+    "watering": {
+      "label": "Mantener humedad estable",
+      "cadenceHint": "Regar cuando la parte superior del sustrato empiece a secarse"
+    },
+    "specialTasks": [
+      "Pinzar la punta cuando tenga varias hojas para fomentar ramificacion.",
+      "Cosechar por hojas o puntas, no toda la planta de una vez."
+    ],
+    "commonProblems": [
+      {
+        "symptom": "Hojas amarillas",
+        "likelyCause": "Exceso de agua o poco drenaje",
+        "whatToDo": "Dejar secar un poco mas entre riegos y confirmar que la maceta drene bien."
+      },
+      {
+        "symptom": "Tallos largos y debiles",
+        "likelyCause": "Poca luz",
+        "whatToDo": "Mover a una zona mas luminosa."
+      }
+    ],
+    "stages": [
+      {
+        "id": "seed",
+        "label": "Semilla sembrada",
+        "startDay": 0,
+        "endDay": 5,
+        "todayFocus": "Revisar humedad sin saturar",
+        "expectation": "La superficie debe mantenerse ligeramente humeda."
+      },
+      {
+        "id": "germination",
+        "label": "Germinacion",
+        "startDay": 5,
+        "endDay": 10,
+        "todayFocus": "Buscar brotes y asegurar buena luz",
+        "expectation": "Aparecen plantulas pequenas y delicadas."
+      },
+      {
+        "id": "growth",
+        "label": "Crecimiento de hojas",
+        "startDay": 10,
+        "endDay": 34,
+        "todayFocus": "Ver si ya toca pinzar la punta",
+        "expectation": "La planta toma volumen y salen mas pares de hojas."
+      },
+      {
+        "id": "harvest",
+        "label": "Cosecha continua",
+        "startDay": 35,
+        "endDay": 60,
+        "todayFocus": "Cosechar puntas o hojas externas",
+        "expectation": "Ya puedes usar hojas en cocina y seguir estimulando nuevo crecimiento."
+      }
+    ]
+  },
+  {
+    "plantId": "bush-bean",
+    "name": "Frijol de mata",
+    "category": "vegetable",
+    "difficulty": "easy",
+    "kitFit": "good",
+    "whyItWorks": [
+      "Da fruto visible sin el nivel de dificultad del tomate.",
+      "Tiene hitos emocionantes: brote, hojas, flor y vaina.",
+      "Es muy bueno para reforzar la idea de progreso."
+    ],
+    "germinationDays": [5, 10],
+    "harvestDays": [45, 65],
+    "sun": {
+      "label": "Pleno sol",
+      "hours": "6+ horas"
+    },
+    "watering": {
+      "label": "Humedad estable con buen drenaje",
+      "cadenceHint": "Revisar varias veces por semana y aumentar vigilancia en clima caliente"
+    },
+    "specialTasks": [
+      "Evitar encharcamientos prolongados.",
+      "Observar aparicion de flores y luego de vainas."
+    ],
+    "commonProblems": [
+      {
+        "symptom": "Brota pero se estanca",
+        "likelyCause": "Poca luz o maceta apretada",
+        "whatToDo": "Mover a pleno sol y revisar si la densidad de siembra es excesiva."
+      },
+      {
+        "symptom": "No forma vainas",
+        "likelyCause": "Falta de sol o etapa aun temprana",
+        "whatToDo": "Esperar hasta floracion y asegurar varias horas de luz directa."
+      }
+    ],
+    "stages": [
+      {
+        "id": "seed",
+        "label": "Semilla sembrada",
+        "startDay": 0,
+        "endDay": 5,
+        "todayFocus": "Mantener sustrato humedo y aireado",
+        "expectation": "Aun no hay cambios visibles."
+      },
+      {
+        "id": "germination",
+        "label": "Brote inicial",
+        "startDay": 5,
+        "endDay": 10,
+        "todayFocus": "Ver primeros brotes",
+        "expectation": "Aparece un brote grueso y rapido."
+      },
+      {
+        "id": "growth",
+        "label": "Crecimiento vegetativo",
+        "startDay": 10,
+        "endDay": 44,
+        "todayFocus": "Vigilar hojas, luz y estabilidad",
+        "expectation": "La planta gana altura, hojas y luego flores."
+      },
+      {
+        "id": "harvest",
+        "label": "Formacion de vainas",
+        "startDay": 45,
+        "endDay": 65,
+        "todayFocus": "Revisar vainas listas",
+        "expectation": "Empiezan a aparecer frijoles tiernos para cosecha."
+      }
+    ]
+  }
+]

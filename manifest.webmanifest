@@ -1,0 +1,11 @@
+{
+  "name": "Veggestation",
+  "short_name": "Veggestation",
+  "description": "Acompanamiento de cultivo desde la siembra hasta la cosecha.",
+  "theme_color": "#163527",
+  "background_color": "#f7f1de",
+  "display": "standalone",
+  "start_url": "./#/app",
+  "scope": "./",
+  "icons": []
+}
