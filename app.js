@@ -269,29 +269,19 @@ function nameSection() {
   return `
   <section class="name-section" id="nombre">
     <div class="container">
-      <div class="name-layout">
-        <div class="name-story">
-          <div class="name-marquee" aria-hidden="true">
-            <span class="name-marquee-word">Veggestation</span>
-          </div>
-          <div class="name-hero-lockup" aria-label="Desglose visual del nombre Veggestation">
-            <div class="name-badge name-badge-veg">
-              <span class="name-badge-label">VEG</span>
-              <p>lo vegetal, lo verde, lo que brota</p>
-            </div>
-            <div class="name-badge name-badge-ges">
-              <span class="name-badge-label">GESTATION</span>
-              <p>acompañar el crecimiento hasta verlo cambiar</p>
-            </div>
-            <h3 class="name-big-word">
-              <span class="name-big-veg">VEG</span><span class="name-big-ges">GESTATION</span>
-            </h3>
-          </div>
-          <div class="name-caption">
-            <p>Vegetal al inicio. El crecimiento en el resto.</p>
-          </div>
+      <div class="name-split" aria-label="Desglose visual del nombre Veggestation">
+        <div class="name-half name-half-veg">
+          <span class="name-half-label">VEG</span>
+          <p class="name-half-def">lo vegetal, lo verde, lo que brota</p>
+        </div>
+        <div class="name-half-divider" aria-hidden="true">+</div>
+        <div class="name-half name-half-ges">
+          <span class="name-half-label">GESTATION</span>
+          <p class="name-half-def">acompañar el crecimiento hasta verlo cambiar</p>
         </div>
       </div>
+      <p class="name-merge" aria-hidden="true"><span class="name-merge-veg">VEG</span><span class="name-merge-ges">GESTATION</span></p>
+      <p class="name-tagline">Vegetal al inicio. El crecimiento en el resto.</p>
     </div>
   </section>`;
 }
