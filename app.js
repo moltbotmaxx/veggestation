@@ -160,10 +160,10 @@ function topbarUser() {
       <div class="brand-copy"><strong>Veggestation</strong><span>Semilla a cosecha, sin improvisar</span></div>
     </a>
     <nav class="topnav">
-      <a href="#/como-funciona">Cómo funciona</a>
-      <a href="#/kits">Kits</a>
-      <a href="#/tienda">Tienda</a>
-      <a href="#/faq">FAQ</a>
+      <button class="navlink-reset" type="button" data-scroll-target="como-funciona">Cómo funciona</button>
+      <button class="navlink-reset" type="button" data-scroll-target="kits">Kits</button>
+      <button class="navlink-reset" type="button" data-scroll-target="tienda">Tienda</button>
+      <button class="navlink-reset" type="button" data-scroll-target="faq">FAQ</button>
       <a class="button button-primary button-small topnav-cta" href="#/app">Ver experiencia guiada</a>
     </nav>
   </header>`;
@@ -238,7 +238,7 @@ function heroSection() {
         <h1 class="hero-display">Tu primera cosecha empieza hoy.</h1>
         <p class="hero-lead">Veggestation convierte cultivar en una experiencia clara, bella y guiada: recibes el kit, activas tu cultivo y sabes exactamente qué hacer en cada etapa.</p>
         <div class="hero-ctas">
-          <a class="button button-sun" href="#/kits">Ver kits →</a>
+          <button class="button button-sun" type="button" data-scroll-target="kits">Ver kits →</button>
           <a class="button button-ghost-light" href="#/app">Ver experiencia</a>
         </div>
         <div class="hero-social-proof">
@@ -513,7 +513,7 @@ function ctaBand() {
           </div>
           <p class="form-note">Te contactamos para disponibilidad, lanzamiento de kits y novedades relevantes.</p>
           <div class="cta-band-actions">
-            <a class="button button-ghost-light" href="#/kits">Ver kits</a>
+            <button class="button button-ghost-light" type="button" data-scroll-target="kits">Ver kits</button>
             <a class="button button-ghost-light" href="#/app">Ver experiencia guiada</a>
           </div>
         </div>
@@ -535,10 +535,10 @@ function siteFooter() {
           </div>
         </div>
         <div class="footer-links">
-          <a href="#/como-funciona">Cómo funciona</a>
-          <a href="#/kits">Kits</a>
-          <a href="#/tienda">Tienda</a>
-          <a href="#/faq">FAQ</a>
+          <button class="navlink-reset" type="button" data-scroll-target="como-funciona">Cómo funciona</button>
+          <button class="navlink-reset" type="button" data-scroll-target="kits">Kits</button>
+          <button class="navlink-reset" type="button" data-scroll-target="tienda">Tienda</button>
+          <button class="navlink-reset" type="button" data-scroll-target="faq">FAQ</button>
           <a href="#/app">Experiencia guiada</a>
         </div>
         <div class="footer-meta">
@@ -923,6 +923,28 @@ function initCTAs() {
   });
 }
 
+function initSectionLinks() {
+  document.querySelectorAll("[data-scroll-target]").forEach(link => {
+    link.addEventListener("click", (event) => {
+      const targetId = link.dataset.scrollTarget;
+      const target = document.getElementById(targetId);
+      if (!target) return;
+
+      event.preventDefault();
+      history.replaceState(null, "", `#/${targetId}`);
+
+      const topbar = document.querySelector(".client-page-shell .topbar");
+      const topbarHeight = topbar ? topbar.getBoundingClientRect().height : 0;
+      const top = Math.max(0, window.scrollY + target.getBoundingClientRect().top - topbarHeight - 12);
+
+      window.scrollTo({
+        top,
+        behavior:"smooth"
+      });
+    });
+  });
+}
+
 function initAppDemo() {
   document.querySelectorAll("[data-app-tab]").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -1200,7 +1222,7 @@ function render() {
 
   document.getElementById("root").innerHTML = `<div class="shell shell-${route}">${topbar}${content}</div>`;
 
-  if (route === "home") { initScrollLanding(); initFAQ(); initCTAs(); }
+  if (route === "home") { initScrollLanding(); initFAQ(); initCTAs(); initSectionLinks(); }
   if (route === "app") { initAppDemo(); }
 
   if (section) {
